@@ -2,9 +2,9 @@ import sqlite3
 from random import choice
 
 """
-add date time
-add info
-content = title if content is empty
+format date time
+add info func
+add last edited attribute
 complete readme
 """
 
@@ -40,6 +40,8 @@ def new_note():
 		user()
 	else:
 		content = input("CONTENT: ")
+		if len(content) == 0:
+			content = title
 		command = """
 		INSERT INTO notestable(title, content, created)
 		VALUES ('{t}', '{c}', CURRENT_TIMESTAMP)
@@ -83,7 +85,7 @@ def view_note():
 		content = result[0][2]
 		note_date = result[0][3][:10]
 		note_time = result[0][3][11:16]
-		note = """\nTITLE: {t}\t{n_t}\t{n_d}\n{c}
+		note = """\n\tTITLE: {t}\t{n_t}\t{n_d}\n\t{c}
 		""".format(t = title, n_t = note_time, n_d = note_date,c = content)
 		print(note)
 		user()
@@ -92,7 +94,7 @@ def edit_note():
 	note_title_list = user_input[1:]
 	note_title = " ".join(note_title_list)
 	new_title = input("NEW TITLE(Press ENTER to leave it as it is): ")
-	new_content = input("NEW CONTENT: ")
+	new_content = input("NEW CONTENT(Press ENTER to leave it as it is): ")
 	if len(new_title) == 0 and len(new_content) == 0:
 		print("NO edits have been made")
 		user()
