@@ -4,6 +4,8 @@ from random import choice
 """
 add date time
 add info
+content = title if content is empty
+complete readme
 """
 
 conn = sqlite3.connect("notes.db")
@@ -19,7 +21,8 @@ def start():
 		CREATE TABLE notestable(
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		title TEXT UNIQUE NOT NULL,
-		content TEXT)
+		content TEXT,
+		created DATETIME)
 		"""
 		cur.execute(command)
 		conn.commit()
@@ -38,7 +41,8 @@ def new_note():
 	else:
 		content = input("CONTENT: ")
 		command = """
-		INSERT INTO notestable(title, content) VALUES ('{t}', '{c}')
+		INSERT INTO notestable(title, content, created)
+		VALUES ('{t}', '{c}', CURRENT_TIMESTAMP)
 		""".format(t = title, c = content)
 		try:
 			cur.execute(command)
@@ -77,8 +81,10 @@ def view_note():
 		result = cur.fetchall()
 		title = result[0][1]
 		content = result[0][2]
-		note = """TITLE: {t}\n{c}
-		""".format(t = title, c = content)
+		note_date = result[0][3][:10]
+		note_time = result[0][3][11:16]
+		note = """\nTITLE: {t}\t{n_t}\t{n_d}\n{c}
+		""".format(t = title, n_t = note_time, n_d = note_date,c = content)
 		print(note)
 		user()
 
@@ -140,7 +146,7 @@ def exit():
 def help_func():
 	help_screen = """
 	Commands			Description
-	-----------------------------------------------------------
+	------------------------------------------------------------------------
 	new            			Create a new note
 	list           			List all the notes that you have created
 	view <note title>		Expand a note
