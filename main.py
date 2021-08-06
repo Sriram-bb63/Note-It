@@ -2,9 +2,7 @@ import sqlite3
 from random import choice
 
 """
-format date time
 add info func
-add last edited attribute
 complete readme
 user .local/splithare
 """
