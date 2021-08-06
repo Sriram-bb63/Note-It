@@ -27,19 +27,19 @@ def start():
 		cur.execute(command)
 		conn.commit()
 		print("Welcome to 𝑁𝑜𝑡𝑒𝐼𝑡")
-		print("\nTABLE 'notestable' CREATED SUCCESSFULLY")
+		print("\nTable 'notestable' created successfully")
 	except sqlite3.OperationalError:
 		print("Welcome back to 𝑁𝑜𝑡𝑒𝐼𝑡")
 	print("\n'help' to view all available commands and how to use them")
 	user()
 
 def new_note():
-	title = input("TITLE(Press ENTER to cancel): ")
+	title = input("\033[1mTitle:\033[0m(Press ENTER to cancel): ")
 	if len(title) == 0:
 		print("No new notes have been created")
 		user()
 	else:
-		content = input("CONTENT: ")
+		content = input("\033[1mContent:\033[0m ")
 		if len(content) == 0:
 			content = title
 		command = """
@@ -76,25 +76,6 @@ def view_note():
 		print("'help' to view all available commands and how to use them")
 		user()
 	else:
-		# command = """
-		# SELECT title, content, STRFTIME('%d/%m/%Y, %H:%M', created) as created, edited 
-		# FROM notestable
-		# WHERE title = '{t}'
-		# """.format(t = note_title)
-		# cur.execute(command)
-		# result = cur.fetchall()
-		# title = result[0][0]
-		# content = result[0][1]
-		# created = result[0][2]
-		# edited = result[0][3]
-		# if edited == None:
-		# 	note = """\n\tTITLE: {t}\t{n_c}\n\t{c}
-		# 	""".format(t = title, n_c = created, c = content)
-		# elif type(edited) == str:
-		# 	note = """\n\tTITLE: {t}\t{n_c}\n\t{c}
-		# 	""".format(t = title, n_c = created, c = content)
-		# print(note)
-		# user()
 		check_edit_command = """
 		SELECT edited FROM notestable WHERE title = '{t}'
 		""".format(t = note_title)
@@ -139,50 +120,50 @@ def view_note():
 	\033[1mContent:\033[0m {c}
 			""".format(c_d = created, e_d = edited, t = title, c = content)
 			print(note)
-		else:
-			print("ooga booga")
 		user()
 
 
 def edit_note():
 	note_title_list = user_input[1:]
 	note_title = " ".join(note_title_list)
-	new_title = input("NEW TITLE(Press ENTER to leave it as it is): ")
-	new_content = input("NEW CONTENT(Press ENTER to leave it as it is): ")
-	if len(new_title) == 0 and len(new_content) == 0:
-		print("NO edits have been made")
-		user()
-	elif len(new_title) == 0 and len(new_content) > 0:
-		command = """
-		UPDATE notestable
-		SET content = '{n_c}', edited = CURRENT_TIMESTAMP
-		WHERE title = '{t}'
-		""".format(n_c = new_content, t = note_title)
+	if len(note_title) == 0:
+		print("'help' to view all available commands and how to use them")
 	else:
-		command = """
-		UPDATE notestable
-		SET title = '{n_t}', content = '{n_c}', edited = CURRENT_TIMESTAMP
-		WHERE title = '{t}'
-		""".format(n_t = new_title, n_c = new_content, t = note_title)
-	cur.execute(command)
-	conn.commit()
-	print("1 edit has been made")
+		new_title = input("\033[1mNew title:\033[0m(Press ENTER to leave it as it is): ")
+		new_content = input("\033[1mNew content:\033[0m(Press ENTER to leave it as it is): ")
+		if len(new_title) == 0 and len(new_content) == 0:
+			print("NO edits have been made")
+			user()
+		elif len(new_title) == 0 and len(new_content) > 0:
+			command = """
+			UPDATE notestable
+			SET content = '{n_c}', edited = CURRENT_TIMESTAMP
+			WHERE title = '{t}'
+			""".format(n_c = new_content, t = note_title)
+		else:
+			command = """
+			UPDATE notestable
+			SET title = '{n_t}', content = '{n_c}', edited = CURRENT_TIMESTAMP
+			WHERE title = '{t}'
+			""".format(n_t = new_title, n_c = new_content, t = note_title)
+		cur.execute(command)
+		conn.commit()
+		print("1 edit has been made")
 	user()
 
 def delete_note():
 	note_title_list = user_input[1:]
 	note_title = " ".join(note_title_list)
 	if len(note_title) == 0:
-		print("No notes have been deleted")
-		user()
+		print("'help' to view all available commands and how to use them")
 	else:
 		command = """
 		DELETE FROM notestable WHERE title = '{t}'
 		""".format(t = note_title)
 		cur.execute(command)
 		conn.commit()
-		print("DELETED SUCCESSFULLY")
-		user()
+		print("1 note has been deleted")
+	user()
 
 def info():
 	pass
@@ -201,8 +182,7 @@ def exit():
 
 def help_func():
 	help_screen = """
-	Commands			Description
-	------------------------------------------------------------------------
+	\033[1mCommands\033[0m			\033[1mDescription\033[0m
 	new            			Create a new note
 	list           			List all the notes that you have created
 	view <note title>		Expand a note
