@@ -6,6 +6,7 @@ format date time
 add info func
 add last edited attribute
 complete readme
+user .local/splithare
 """
 
 conn = sqlite3.connect("notes.db")
@@ -22,7 +23,8 @@ def start():
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		title TEXT UNIQUE NOT NULL,
 		content TEXT,
-		created DATETIME)
+		created DATETIME,
+		edited DATETIME)
 		"""
 		cur.execute(command)
 		conn.commit()
@@ -43,8 +45,8 @@ def new_note():
 		if len(content) == 0:
 			content = title
 		command = """
-		INSERT INTO notestable(title, content, created)
-		VALUES ('{t}', '{c}', CURRENT_TIMESTAMP)
+		INSERT INTO notestable(title, content, created, edited)
+		VALUES ('{t}', '{c}', CURRENT_TIMESTAMP, NULL)
 		""".format(t = title, c = content)
 		try:
 			cur.execute(command)
@@ -76,19 +78,73 @@ def view_note():
 		print("'help' to view all available commands and how to use them")
 		user()
 	else:
-		command = """
-		SELECT * FROM notestable WHERE title = '{t}'
+		# command = """
+		# SELECT title, content, STRFTIME('%d/%m/%Y, %H:%M', created) as created, edited 
+		# FROM notestable
+		# WHERE title = '{t}'
+		# """.format(t = note_title)
+		# cur.execute(command)
+		# result = cur.fetchall()
+		# title = result[0][0]
+		# content = result[0][1]
+		# created = result[0][2]
+		# edited = result[0][3]
+		# if edited == None:
+		# 	note = """\n\tTITLE: {t}\t{n_c}\n\t{c}
+		# 	""".format(t = title, n_c = created, c = content)
+		# elif type(edited) == str:
+		# 	note = """\n\tTITLE: {t}\t{n_c}\n\t{c}
+		# 	""".format(t = title, n_c = created, c = content)
+		# print(note)
+		# user()
+		check_edit_command = """
+		SELECT edited FROM notestable WHERE title = '{t}'
 		""".format(t = note_title)
-		cur.execute(command)
-		result = cur.fetchall()
-		title = result[0][1]
-		content = result[0][2]
-		note_date = result[0][3][:10]
-		note_time = result[0][3][11:16]
-		note = """\n\tTITLE: {t}\t{n_t}\t{n_d}\n\t{c}
-		""".format(t = title, n_t = note_time, n_d = note_date,c = content)
-		print(note)
+		cur.execute(check_edit_command)
+		edited = cur.fetchall()
+		edited = edited[0][0]
+		if edited == None:
+			command = """
+			SELECT title,content,
+			STRFTIME('%d/%m/%Y, %H:%M', created) as created 
+			FROM notestable
+			WHERE title = '{t}'
+			""".format(t = note_title)
+			cur.execute(command)
+			result = cur.fetchall()
+			title = result[0][0]
+			content = result[0][1]
+			created = result[0][2]
+			note = """
+	Created: {c_d}\tLast edited: On creation
+	\033[1mTitle:\033[0m {t}
+	\033[1mContent:\033[0m {c}
+			""".format(c_d = created, t = title, c = content)
+			print(note)
+		elif type(edited) == str:
+			command = """
+			SELECT title, content,
+			STRFTIME('%d/%m/%Y, %H:%M', created) as created,
+			STRFTIME('%d/%m/%Y, %H:%M', edited) as edited  
+			FROM notestable
+			WHERE title = '{t}'
+			""".format(t = note_title)
+			cur.execute(command)
+			result = cur.fetchall()
+			title = result[0][0]
+			content = result[0][1]
+			created = result[0][2]
+			edited = result[0][3]
+			note = """
+	Created: {c_d}\tLast edited: {e_d}
+	\033[1mTitle:\033[0m {t}
+	\033[1mContent:\033[0m {c}
+			""".format(c_d = created, e_d = edited, t = title, c = content)
+			print(note)
+		else:
+			print("ooga booga")
 		user()
+
 
 def edit_note():
 	note_title_list = user_input[1:]
@@ -101,13 +157,13 @@ def edit_note():
 	elif len(new_title) == 0 and len(new_content) > 0:
 		command = """
 		UPDATE notestable
-		SET content = '{n_c}'
+		SET content = '{n_c}', edited = CURRENT_TIMESTAMP
 		WHERE title = '{t}'
 		""".format(n_c = new_content, t = note_title)
 	else:
 		command = """
 		UPDATE notestable
-		SET title = '{n_t}', content = '{n_c}'
+		SET title = '{n_t}', content = '{n_c}', edited = CURRENT_TIMESTAMP
 		WHERE title = '{t}'
 		""".format(n_t = new_title, n_c = new_content, t = note_title)
 	cur.execute(command)
@@ -162,7 +218,7 @@ def help_func():
 
 def user():
 	global user_input
-	user_input = input("\n𝑁𝑜𝑡𝑒𝐼𝑡 -> ").split()
+	user_input = input("\n\033[1m𝑁𝑜𝑡𝑒𝐼𝑡\033[0m -> ").split()
 	user_command = user_input[0]
 	commands = {
 	"new": new_note,
