@@ -1,12 +1,6 @@
 import sqlite3
 from random import choice
 
-"""
-add info func
-complete readme
-user .local/splithare
-"""
-
 conn = sqlite3.connect("notes.db")
 global cur
 cur = conn.cursor()
