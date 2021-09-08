@@ -191,7 +191,7 @@ def help_func():
 def user():
 	global user_input
 	user_input = input("\n\033[1m𝑁𝑜𝑡𝑒𝐼𝑡\033[0m -> ").split()
-	user_command = user_input[0]
+	user_command = user_input[0].lower()
 	commands = {
 	"new": new_note,
 	"list": list_notes,
